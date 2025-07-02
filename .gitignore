@@ -1,0 +1,28 @@
+
+
+# ====================
+# Dossiers de logs, outputs, checkpoints
+# ====================
+logs/
+checkpoints/
+data/checkpoints/
+spark-warehouse/
+metastore_db/
+nohup.out
+
+# ====================
+# 📓 Jupyter Notebooks
+# ====================
+.ipynb_checkpoints/
+
+# ====================
+# 🪟 Fichiers système (Windows/macOS)
+# ====================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ====================
+# 🧪 VSCode (optionnel)
+# ====================
+.vscode/
