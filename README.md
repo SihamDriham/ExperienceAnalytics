@@ -94,7 +94,37 @@ python scripts/producer_applications.py
 python scripts/producer_sentiments.py
 ```
 
-### 4. Lancer le job Spark 
+### 4. Préparation de la base Cassandra
+
+Avant de lancer les scripts Spark, il faut créer le keyspace et les tables nécessaires dans Cassandra.
+
+1. Ouvrez `cqlsh` :
+```bash
+docker exec -it cassandra cqlsh
+```
+
+2. Créez le keyspace experience_analytics :
+```bash
+CREATE KEYSPACE experience_analytics
+WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+```
+
+3. Sélectionnez le keyspace :
+```bash
+USE experience_analytics;
+```
+
+4. Créez la table user_activity_by_department :
+```bash
+CREATE TABLE user_activity_by_department (
+    department TEXT,
+    date DATE,
+    total_active_users INT,
+    avg_active_days FLOAT,
+    PRIMARY KEY ((department), date)
+);
+```
+### 5. Lancer le job Spark 
 
 Exécutez-le depuis PowerShell en mode administrateur avec la commande suivante:
 
