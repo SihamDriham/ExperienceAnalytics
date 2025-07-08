@@ -4,8 +4,11 @@ from pyspark.sql.types import StructType, StringType, TimestampType, IntegerType
 
 # 1. SparkSession
 spark = SparkSession.builder \
-    .appName("KafkaUsersCleanStream") \
+    .appName("KafkaUsersStream") \
+    .config("spark.cassandra.connection.host", "cassandra") \
+    .config("spark.cassandra.connection.port", "9042") \
     .getOrCreate()
+
 
 spark.sparkContext.setLogLevel("WARN")
 
@@ -15,6 +18,7 @@ df_raw = spark.readStream \
     .option("kafka.bootstrap.servers", "kafka:29092") \
     .option("subscribe", "users-topic") \
     .option("startingOffsets", "earliest") \
+    .option("failOnDataLoss", "false") \
     .load()
 
 # 3. Convertir le message Kafka en string
@@ -51,11 +55,47 @@ df_clean = df_parsed \
     .filter(col("first_seen").isNotNull() & col("last_seen").isNotNull()) \
     .filter(col("first_seen") < col("last_seen")) 
 
-# 7. Affichage en streaming
-query = df_clean.writeStream \
-    .outputMode("append") \
-    .format("console") \
-    .option("truncate", False) \
+#7. Traitement
+
+#Utilisateurs actifs par département
+df_actifs = df_clean.filter(col("number_of_days_since_last_seen") < 6)
+df_stats_par_dept = df_actifs.groupBy("department") \
+    .agg(
+        count("*").alias("total_active_users"),
+        avg("total_active_days").alias("avg_active_days")
+    ) \
+    .withColumn("date", current_date()) \
+    .select("department", "date", "total_active_users", "avg_active_days")
+
+# 8. Fonction pour écrire dans Cassandra
+def write_to_cassandra(df, epoch_id):
+    print(f"Traitement du batch {epoch_id}")
+    try:
+        df.write \
+            .format("org.apache.spark.sql.cassandra") \
+            .mode("append") \
+            .option("keyspace", "experience_analytics") \
+            .option("table", "user_activity_by_department") \
+            .option("spark.cassandra.output.ttl", "864000") \
+            .save()
+        print(f"Batch {epoch_id} écrit avec succès dans Cassandra")
+    except Exception as e:
+        print(f"Erreur lors de l'écriture du batch {epoch_id}: {str(e)}")
+
+# 9. Écriture en streaming vers Cassandra
+query_to_cassandra = df_stats_par_dept.writeStream \
+    .outputMode("update") \
+    .foreachBatch(write_to_cassandra) \
+    .option("checkpointLocation", "/opt/bitnami/spark/checkpoints/active_users_by_dept") \
+    .trigger(processingTime='30 seconds') \
     .start()
 
-query.awaitTermination()
+# 10. Attendre la fin des streams
+try:
+    query_to_cassandra.awaitTermination()
+except KeyboardInterrupt:
+    print("Arrêt du streaming...")
+    query_to_cassandra.stop()
+    if 'query_console' in locals():
+        query_console.stop()
+    spark.stop()

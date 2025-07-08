@@ -71,10 +71,47 @@ services:
     networks:
       - data-pipeline
       
-  #Spark
+  cassandra:
+    image: cassandra:4.1
+    container_name: cassandra
+    ports:
+      - "9042:9042"
+      - "7000:7000"
+    environment:
+      - CASSANDRA_CLUSTER_NAME=DataPipeline
+      - CASSANDRA_DC=datacenter1
+      - CASSANDRA_RACK=rack1
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - CASSANDRA_SEEDS=cassandra
+      - CASSANDRA_LISTEN_ADDRESS=auto
+      - CASSANDRA_BROADCAST_ADDRESS=auto
+      - CASSANDRA_RPC_ADDRESS=0.0.0.0
+      - CASSANDRA_START_RPC=true
+      - MAX_HEAP_SIZE=1G
+      - HEAP_NEWSIZE=200M
+    volumes:
+      - cassandra_data:/var/lib/cassandra
+    healthcheck:
+      test: ["CMD-SHELL", "nodetool status || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+    restart: unless-stopped
+    networks:
+      - data-pipeline
+    ulimits:
+      memlock: -1
+      nofile:
+        soft: 100000
+        hard: 100000
+
   spark-master:
     image: bitnami/spark:3.5
     container_name: spark-master
+    depends_on:
+      cassandra:
+        condition: service_healthy
     # IMPORTANT: Remettre l'utilisateur pour éviter les problèmes d'authentification
     user: "1001:1001"
     environment:
@@ -108,6 +145,17 @@ services:
       - ./config/spark:/opt/bitnami/spark/conf
       # Fichier passwd personnalisé pour résoudre l'authentification Unix
       - ./config/passwd:/etc/passwd:ro
+    command: >
+      bash -c "
+        echo 'Attente de Cassandra...'
+        until timeout 1 bash -c '</dev/tcp/cassandra/9042' 2>/dev/null; do
+          echo 'Cassandra pas encore prêt, attente...'
+          sleep 2
+        done
+        echo 'Cassandra est prêt!'
+        # Démarrer Spark Master
+        /opt/bitnami/scripts/spark/entrypoint.sh /opt/bitnami/scripts/spark/run.sh
+      "
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080"]
       interval: 30s
@@ -124,6 +172,8 @@ services:
     container_name: spark-worker
     depends_on:
       spark-master:
+        condition: service_healthy
+      cassandra:
         condition: service_healthy
     # IMPORTANT: Remettre l'utilisateur
     user: "1001:1001"
@@ -338,31 +388,6 @@ services:
     networks:
       - data-pipeline
 
-  # Cassandra
-  cassandra:
-    image: cassandra:4.1
-    container_name: cassandra
-    ports:
-      - "9042:9042"
-    environment:
-      - CASSANDRA_CLUSTER_NAME=DataPipeline
-      - CASSANDRA_DC=datacenter1
-      - CASSANDRA_RACK=rack1
-      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
-      - MAX_HEAP_SIZE=1G
-      - HEAP_NEWSIZE=200M
-    volumes:
-      - cassandra_data:/var/lib/cassandra
-    healthcheck:
-      test: ["CMD-SHELL", "cqlsh -e 'describe keyspaces'"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 120s
-    restart: unless-stopped
-    networks:
-      - data-pipeline
-
   # Grafana pour la visualisation
   grafana:
     image: grafana/grafana:10.2.0
@@ -373,7 +398,8 @@ services:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
-      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel,hadesarchitect-cassandra-datasource
+
     volumes:
       - grafana_data:/var/lib/grafana
       - ./config/grafana:/etc/grafana/provisioning
@@ -398,7 +424,6 @@ volumes:
   zookeeper_data:
   kafka_data:
   postgres_data:
-  superset_data:
   postgres_airflow_data:
   redis_data:
   spark_logs:

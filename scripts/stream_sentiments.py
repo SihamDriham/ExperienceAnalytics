@@ -48,4 +48,3 @@ query = df_clean.writeStream \
 
 query.awaitTermination()
 
-

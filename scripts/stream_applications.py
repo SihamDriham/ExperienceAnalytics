@@ -62,4 +62,3 @@ query = df_clean.writeStream \
     .start()
 
 query.awaitTermination()
-
