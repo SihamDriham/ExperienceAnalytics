@@ -142,3 +142,15 @@ spark-submit stream_sentiments.py
 ```
 **Note :** Exécutez ces commandes une par une, attendez que chaque job se lance correctement avant d’en lancer un autre.  
 Pour arrêter un job Spark en cours, utilisez `CTRL + C`.
+
+### 6. Visualisation avec Grafana
+
+1. Connecte-toi sur http://localhost:3000 avec admin/admin
+2. Va dans Ajouter une sources de données
+3. Cherche Cassandra
+4. Renseigne :
+   - Contact points : cassandra 
+   - Port : 9042
+   - Keyspace : experience_analytics
+5. Teste la connexion, elle doit réussir.
+6. Créer un Dashboard avec une requête Cassandra
