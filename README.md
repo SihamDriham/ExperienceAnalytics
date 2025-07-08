@@ -11,7 +11,7 @@ Ce projet vise à mettre en place une solution analytique Big Data complète pou
 
 ---
 ## Architecture du Projet
-![Image](https://github.com/user-attachments/assets/b498620c-19ee-492b-9ac5-1f0753f6b0a5)
+<img width="882" height="666" alt="Image" src="https://github.com/user-attachments/assets/24d60689-b781-448e-a0f4-03fe9dfc6d6b" />
 
 Le pipeline repose sur les composants suivants :
 
