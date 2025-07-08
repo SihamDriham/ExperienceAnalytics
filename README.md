@@ -109,7 +109,6 @@ spark-submit stream_users.py
 spark-submit stream_devices.py
 spark-submit stream_applications.py
 spark-submit stream_sentiments.py
-.\run_spark_sentiments.bat
 ```
 **Note :** Exécutez ces commandes une par une, attendez que chaque job se lance correctement avant d’en lancer un autre.  
 Pour arrêter un job Spark en cours, utilisez `CTRL + C`.
