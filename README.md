@@ -17,7 +17,6 @@ Le pipeline repose sur les composants suivants :
 
 - **Kafka** : ingestion de données en streaming
 - **Spark (Streaming & Batch)** : traitement des données en temps réel et en différé
-- **HDFS** : stockage des données brutes
 - **Cassandra** : stockage des données 
 - **Grafana** : visualisation et reporting
 - **Airflow** : orchestration des traitements batch
@@ -95,13 +94,20 @@ python scripts/producer_applications.py
 python scripts/producer_sentiments.py
 ```
 
-### 4. Lancer le job Spark Streaming pour consommer les données Kafka
+### 4. Lancer le job Spark 
 
 Exécutez-le depuis PowerShell en mode administrateur avec la commande suivante:
 
 ```bash
-.\run_spark_users.bat
-.\run_spark_devices.bat
-.\run_spark_applications.bat
+docker exec -it spark-master bash
+```
+```bash
+cd /opt/bitnami/spark/scripts
+```
+```bash
+spark-submit stream_users.py
+spark-submit stream_devices.py
+spark-submit stream_applications.py
+spark-submit stream_sentiments.py
 .\run_spark_sentiments.bat
 ```
