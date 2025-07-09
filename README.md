@@ -69,6 +69,12 @@ Le pipeline repose sur les composants suivants :
 - Supprimer sentiments sans id et user_id
 
 ---
+## Nettoyage des données
+
+- Utilisateurs actifs par département
+- Moyenne des jours actifs par département
+
+---
 ## Étapes de Mise en Place
 
 ### 1. Lancer l’environnement Docker
