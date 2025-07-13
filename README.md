@@ -73,6 +73,10 @@ Le pipeline repose sur les composants suivants :
 
 - Utilisateurs actifs par département
 - Moyenne des jours actifs par département
+- Moyenne d'utilisation CPU/RAM par modèle d'équipement
+- Nombre total de crashs par application
+- Taux d’utilisation Windows vs Mac
+- Pour chaque feedback négatif (score ≤ 2), détecter si un modèle d’équipement ou une application utilisée à cette même date est lié à une mauvaise expérience.
 
 ---
 ## Étapes de Mise en Place
@@ -120,7 +124,7 @@ WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
 USE experience_analytics;
 ```
 
-4. Créez la table user_activity_by_department :
+4. Créez les tables :
 ```bash
 CREATE TABLE user_activity_by_department (
     department TEXT,
@@ -130,6 +134,51 @@ CREATE TABLE user_activity_by_department (
     PRIMARY KEY ((department), date)
 );
 ```
+```bash
+CREATE TABLE user_os_usage_stats (
+   date DATE,
+   windows_count INT,
+   mac_count INT,
+   windows_usage_rate FLOAT,
+   mac_usage_rate FLOAT,
+   total_users INT,
+   PRIMARY KEY (date)
+);
+```
+
+```bash
+CREATE TABLE avg_usage_by_model (
+    model text,
+    date date,
+    avg_cpu_usage float,
+    avg_ram_usage float,
+    avg_disk_usage float,
+    PRIMARY KEY (model, date)
+);
+```
+
+```bash
+CREATE TABLE sum_crash_rate (
+    id text,
+    date date,
+    sum_crash_rate float,
+    PRIMARY KEY (id, date)
+);
+```
+
+```bash
+CREATE TABLE sentiment_tech_correlation (
+    user_id TEXT,
+    date DATE,
+    model TEXT,
+    os TEXT,
+    total_active_days INT,
+    cpu_usage FLOAT,
+    ram_usage FLOAT,
+    PRIMARY KEY ((user_id), date)
+);
+```
+
 ### 5. Lancer le job Spark 
 
 Exécutez-le depuis PowerShell en mode administrateur avec la commande suivante:
@@ -142,7 +191,7 @@ cd /opt/bitnami/spark/scripts
 ```
 ```bash
 spark-submit stream_users.py
-spark-submit stream_devices.py
+spark-submit spark/stream_devices.py
 spark-submit stream_applications.py
 spark-submit stream_sentiments.py
 ```
