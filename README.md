@@ -77,8 +77,8 @@ Le pipeline repose sur les composants suivants :
 - Nombre total de crashs par application
 - Taux d’utilisation Windows vs Mac
 - Pour chaque feedback négatif (score ≤ 2), détecter si un modèle d’équipement ou une application utilisée à cette même date est lié à une mauvaise expérience.
-- analyser l’utilisation des applications
-- Taux de satisfaction numérique
+- analyser l’utilisation des applications (Somme de total_active_days par application, Moyenne de crash_rate par application, Top 5 des apps les plus lourdes)
+- Taux de satisfaction numérique (Moyenne des score_sentiment par département (department), Évolution du score dans le temps (record_date), Score moyen par device model ou job_title)
 
 ---
 ## Étapes de Mise en Place
