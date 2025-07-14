@@ -77,6 +77,8 @@ Le pipeline repose sur les composants suivants :
 - Nombre total de crashs par application
 - Taux d’utilisation Windows vs Mac
 - Pour chaque feedback négatif (score ≤ 2), détecter si un modèle d’équipement ou une application utilisée à cette même date est lié à une mauvaise expérience.
+- analyser l’utilisation des applications
+- Taux de satisfaction numérique
 
 ---
 ## Étapes de Mise en Place
@@ -176,6 +178,33 @@ CREATE TABLE sentiment_tech_correlation (
     cpu_usage FLOAT,
     ram_usage FLOAT,
     PRIMARY KEY ((user_id), date)
+);
+```
+
+```bash
+CREATE TABLE app_usage_stats (
+    name text,
+    record_date date,
+    total_days_used int,
+    PRIMARY KEY (name, record_date)
+);
+```
+
+```bash
+CREATE TABLE app_crash_stats (
+    name text,
+    record_date date,
+    avg_crash_rate double,
+    PRIMARY KEY (name, record_date)
+);
+```
+
+```bash
+CREATE TABLE heavy_apps (
+    name text,
+    record_date date,
+    total_consumption double,
+    PRIMARY KEY (record_date, total_consumption, name)
 );
 ```
 
