@@ -35,7 +35,8 @@ application_schema = StructType() \
     .add("crash_rate", StringType()) \
     .add("cpu_consumption", StringType()) \
     .add("ram_consumption", StringType()) \
-    .add("user_id", StringType()) 
+    .add("user_id", StringType()) \
+    .add("record_date", StringType())
 
 # 5. Parser le JSON
 df_parsed = df_string.select(from_json(col("json_string"), application_schema).alias("data")).select("data.*")
@@ -51,6 +52,7 @@ df_clean = df_parsed \
     .withColumn("ram_consumption", col("ram_consumption").cast("double")) \
     .withColumn("first_seen", to_timestamp("first_seen", "yyyy-MM-dd HH:mm:ss")) \
     .withColumn("last_seen", to_timestamp("last_seen", "yyyy-MM-dd HH:mm:ss")) \
+    .withColumn("record_date", to_date("record_date", "yyyy-MM-dd")) \
     .filter(col("first_seen").isNotNull() & col("last_seen").isNotNull()) \
     .filter(col("first_seen") < col("last_seen")) 
 

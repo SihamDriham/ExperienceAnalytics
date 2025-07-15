@@ -30,7 +30,8 @@ device_schema = StructType() \
     .add("disk_usage", StringType()) \
     .add("last_boot", StringType()) \
     .add("is_encrypted", StringType()) \
-    .add("user_id", StringType()) 
+    .add("user_id", StringType()) \
+    .add("record_date", StringType())
 
 # 5. Parser le JSON
 df_parsed = df_string.select(from_json(col("json_string"), device_schema).alias("data")).select("data.*")
@@ -43,6 +44,7 @@ df_clean = df_parsed \
     .withColumn("ram_usage", col("ram_usage").cast("double")) \
     .withColumn("disk_usage", col("disk_usage").cast("double")) \
     .withColumn("is_encrypted", col("is_encrypted").cast("boolean")) \
+    .withColumn("record_date", to_date("record_date", "yyyy-MM-dd")) \
     .withColumn("last_boot", to_timestamp("last_boot", "yyyy-MM-dd HH:mm:ss")) 
 
 # 7. Affichage en streaming

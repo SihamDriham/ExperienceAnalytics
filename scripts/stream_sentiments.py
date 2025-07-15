@@ -28,7 +28,8 @@ sentiment_schema = StructType() \
     .add("response", StringType()) \
     .add("score_sentiment", StringType()) \
     .add("date_response", StringType()) \
-    .add("comment", StringType()) 
+    .add("comment", StringType()) \
+    .add("record_date", StringType())
 
 # 5. Parser le JSON
 df_parsed = df_string.select(from_json(col("json_string"), sentiment_schema).alias("data")).select("data.*")
@@ -37,6 +38,7 @@ df_parsed = df_string.select(from_json(col("json_string"), sentiment_schema).ali
 df_clean = df_parsed \
     .filter(col("sentiment_id").isNotNull()) \
     .filter(col("user_id").isNotNull()) \
+    .withColumn("record_date", to_date("record_date", "yyyy-MM-dd")) \
     .withColumn("score_sentiment", col("score_sentiment").cast("int"))
 
 # 7. Affichage en streaming

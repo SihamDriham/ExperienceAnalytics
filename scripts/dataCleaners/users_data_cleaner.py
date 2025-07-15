@@ -1,0 +1,14 @@
+from pyspark.sql.functions import col, to_timestamp, to_date
+
+def clean_user_data(df):
+    return df.filter(col("id").isNotNull()) \
+        .filter(col("user_uid").isNotNull()) \
+        .withColumn("total_active_days", col("total_active_days").cast("int")) \
+        .withColumn("number_of_days_since_last_seen", col("number_of_days_since_last_seen").cast("int")) \
+        .withColumn("seen_on_windows", col("seen_on_windows").cast("boolean")) \
+        .withColumn("seen_on_mac_os", col("seen_on_mac_os").cast("boolean")) \
+        .withColumn("first_seen", to_timestamp("first_seen", "yyyy-MM-dd HH:mm:ss")) \
+        .withColumn("last_seen", to_timestamp("last_seen", "yyyy-MM-dd HH:mm:ss")) \
+        .withColumn("record_date", to_date("record_date", "yyyy-MM-dd")) \
+        .filter(col("first_seen").isNotNull() & col("last_seen").isNotNull()) \
+        .filter(col("first_seen") < col("last_seen"))

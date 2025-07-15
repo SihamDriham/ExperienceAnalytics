@@ -70,7 +70,8 @@ services:
     restart: unless-stopped
     networks:
       - data-pipeline
-      
+
+  # Cassandra 
   cassandra:
     image: cassandra:4.1
     container_name: cassandra
@@ -106,6 +107,7 @@ services:
         soft: 100000
         hard: 100000
 
+  # Spark
   spark-master:
     image: bitnami/spark:3.5
     container_name: spark-master
