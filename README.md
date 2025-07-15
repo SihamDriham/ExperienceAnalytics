@@ -219,10 +219,11 @@ docker exec -it spark-master bash
 cd /opt/bitnami/spark/scripts
 ```
 ```bash
-spark-submit stream_users.py
+spark-submit spark/stream_users.py
 spark-submit spark/stream_devices.py
-spark-submit stream_applications.py
-spark-submit stream_sentiments.py
+spark-submit spark/stream_applications.py
+spark-submit spark/stream_sentiments.py
+spark-submit spark/stream_alls.py
 ```
 **Note :** Exécutez ces commandes une par une, attendez que chaque job se lance correctement avant d’en lancer un autre.  
 Pour arrêter un job Spark en cours, utilisez `CTRL + C`.
