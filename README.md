@@ -25,19 +25,19 @@ Le pipeline repose sur les composants suivants :
 ## Structure des données
 
 ### 1. `users.csv` – Informations sur les employés
-- `id`, `user_name`, `full_name`, `department`, `job_title`, `first_seen`, `last_seen`, `total_active_days`, `number_of_days_since_last_seen`, `seen_on_windows`, `seen_on_mac_os`, `user_uid` .
+- `id`, `user_name`, `full_name`, `department`, `job_title`, `first_seen`, `last_seen`, `total_active_days`, `number_of_days_since_last_seen`, `seen_on_windows`, `seen_on_mac_os`, `user_uid`, `record_date`, `year`, `month`.
 - **But** : analyser la présence, les comportements et les contextes métiers.
 
 ### 2. `devices.csv` – Équipements utilisés
-- `device_id`, `hostname`, `os`, `model`, `cpu_usage`, `ram_usage`, `disk_usage`, `last_boot`, `is_encrypted`, `user_id`.
+- `device_id`, `hostname`, `os`, `model`, `cpu_usage`, `ram_usage`, `disk_usage`, `last_boot`, `is_encrypted`, `user_id`, `record_date`, `year`, `month`.
 - **But** : détecter les problèmes techniques ou matériels.
 
 ### 3. `applications.csv` – Utilisation des applications
-- `id`, `name`, `compagny`, `description`, `platform`, `storage_policy`, `first_seen`, `last_seen`, `total_active_days`, `database_usage`, `crash_rate`, `cpu_consumption`, `ram_consumption`, `user_id`.
+- `id`, `name`, `compagny`, `description`, `platform`, `storage_policy`, `first_seen`, `last_seen`, `total_active_days`, `database_usage`, `crash_rate`, `cpu_consumption`, `ram_consumption`, `user_id`, `record_date`, `year`, `month`.
 - **But** : analyser les performances applicatives.
 
 ### 4. `sentiments.csv` – Feedback utilisateur
-- `sentiment_id`, `user_id`, `campaign_name`, `question`, `response`, `score_sentiment`, `date_response`, `comment`.
+- `sentiment_id`, `user_id`, `campaign_name`, `question`, `response`, `score_sentiment`, `date_response`, `comment`, `record_date`, `year`, `month`.
 - **But** : mesurer la satisfaction perçue.
 
 ---
@@ -79,6 +79,9 @@ Le pipeline repose sur les composants suivants :
 - Pour chaque feedback négatif (score ≤ 2), détecter si un modèle d’équipement ou une application utilisée à cette même date est lié à une mauvaise expérience.
 - analyser l’utilisation des applications (Somme de total_active_days par application, Moyenne de crash_rate par application, Top 5 des apps les plus lourdes)
 - Taux de satisfaction numérique (Moyenne des score_sentiment par département (department), Évolution du score dans le temps (record_date), Score moyen par device model ou job_title)
+- Prédire les utilisateurs à risque d’insatisfaction prochaine (si CPU > 85%, si RAM > 85%, si crash_rate > 0.3, si appareil non chiffré)
+- Prédire les applications à risque de saturation ou d’instabilité (si cpu_consumption > 80%, si ram_consumption > 80%, si crash_rate > 0.3)
+- Prédire les équipements à remplacer en priorité (si is_encrypted = False, si last_boot > 90 jours, si cpu_usage > 85%, si ram_usage > 85%)
 
 ---
 ## Étapes de Mise en Place
@@ -100,10 +103,10 @@ docker exec -it kafka kafka-topics.sh --create --bootstrap-server localhost:9092
 ### 3. Lancer le Producer Python pour envoyer des données sur Kafka
 
 ```bash
-python scripts/producer_users.py
-python scripts/producer_devices.py
-python scripts/producer_applications.py
-python scripts/producer_sentiments.py
+python scripts/kafka/producer_users.py
+python scripts/kafka/producer_devices.py
+python scripts/kafka/producer_applications.py
+python scripts/kafka/producer_sentiments.py
 ```
 
 ### 4. Préparation de la base Cassandra
