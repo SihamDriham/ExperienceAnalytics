@@ -120,13 +120,13 @@ docker exec -it cassandra cqlsh
 
 2. Créez le keyspace experience_analytics :
 ```bash
-CREATE KEYSPACE experience_analytics
+CREATE KEYSPACE experienceAnalytics
 WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
 ```
 
 3. Sélectionnez le keyspace :
 ```bash
-USE experience_analytics;
+USE experienceAnalytics;
 ```
 
 4. Créez les tables :
@@ -208,6 +208,52 @@ CREATE TABLE heavy_apps (
     record_date date,
     total_consumption double,
     PRIMARY KEY (record_date, total_consumption, name)
+);
+```
+
+```bash
+CREATE TABLE sentiment_by_department (
+    group text,
+    date timestamp,
+    avg_sentiment_score double,
+    PRIMARY KEY (group, date)
+);
+```
+
+```bash
+CREATE TABLE sentiment_by_date (
+    date timestamp PRIMARY KEY,
+    avg_sentiment_score double
+);
+```
+
+```bash
+CREATE TABLE sentiment_by_device_model (
+    group text,
+    date timestamp,
+    avg_sentiment_score double,
+    PRIMARY KEY (group, date)
+);
+```
+
+```bash
+CREATE TABLE sentiment_by_job_title (
+    group text,
+    date timestamp,
+    avg_sentiment_score double,
+    PRIMARY KEY (group, date)
+);
+```
+
+```bash
+CREATE TABLE predire_risky_users (
+    user_id int,
+    date date,
+    department text,
+    full_name text,
+    job_title text,
+    score_risk int,
+    PRIMARY KEY (user_id, date)
 );
 ```
 
