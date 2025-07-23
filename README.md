@@ -257,6 +257,19 @@ CREATE TABLE predire_risky_users (
 );
 ```
 
+```bash
+CREATE TABLE risky_apps (
+    app_id int,
+    date DATE,
+    name TEXT,
+    compagny TEXT,
+    description TEXT,
+    platform TEXT,
+    score_risk INT,
+    PRIMARY KEY ((app_id), date)
+);
+```
+
 ### 5. Lancer le job Spark 
 
 Exécutez-le depuis PowerShell en mode administrateur avec la commande suivante:
