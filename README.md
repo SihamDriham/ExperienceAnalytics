@@ -270,6 +270,18 @@ CREATE TABLE risky_apps (
 );
 ```
 
+```bash
+CREATE TABLE risky_devices (
+     device_id TEXT,
+     hostname TEXT,
+     os TEXT,
+     model TEXT,
+     score_risk INT,
+     date TIMESTAMP,
+     PRIMARY KEY (device_id, date)
+);
+```
+
 ### 5. Lancer le job Spark 
 
 Exécutez-le depuis PowerShell en mode administrateur avec la commande suivante:
