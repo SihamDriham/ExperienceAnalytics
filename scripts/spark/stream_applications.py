@@ -1,6 +1,6 @@
 from kafka.kafka_applications_reader import read_kafka_application_stream
 from dataCleaners.applications_data_cleaner import clean_application_data
-from processing.processing_applications import sum_crash_rate, analyze_application_usage
+from processing.processing_applications import sum_crash_rate, analyze_application_usage, predire_risky_apps
 from cassandra.cassandra_writer import write_to_cassandra
 from spark.spark_session import create_spark_session
 
@@ -12,6 +12,7 @@ if __name__ == "__main__":
 
     df_stats = sum_crash_rate(df_clean)
     results = analyze_application_usage(df_clean)
+    df_risky = predire_risky_apps(df_clean)
 
     query1 = df_stats.writeStream \
         .outputMode("update") \
@@ -42,11 +43,20 @@ if __name__ == "__main__":
         .trigger(processingTime="30 seconds") \
         .start()
 
+    query_risky = df_risky.writeStream \
+        .outputMode("append") \
+        .foreachBatch(lambda df, epoch_id: write_to_cassandra(df, epoch_id, "risky_apps")) \
+        .option("checkpointLocation", "./checkpoints/risky_apps") \
+        .trigger(processingTime='30 seconds') \
+        .start()
+
+
     try:
         query1.awaitTermination()
         query_usage.awaitTermination()
         query_crash.awaitTermination()
         query_top5.awaitTermination()
+        query_risky.awaitTermination()
     except KeyboardInterrupt:
         print("Arrêt manuel du streaming...")
         query1.stop()
@@ -54,3 +64,4 @@ if __name__ == "__main__":
         query_usage.stop()
         query_crash.stop()
         query_top5.stop()
+        query_risky.stop()

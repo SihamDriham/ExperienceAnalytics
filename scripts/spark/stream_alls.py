@@ -8,10 +8,15 @@ from dataCleaners.devices_data_cleaner import clean_device_data
 from dataCleaners.applications_data_cleaner import clean_application_data
 from dataCleaners.sentiments_data_cleaner import clean_sentiment_data
 
-from processing.processing_alls import analyze_sentiment_tech_correlation, compute_digital_sentiment_score
+from processing.processing_alls import analyze_sentiment_tech_correlation, compute_digital_sentiment_score, predire_risky_users
 
 from cassandra.cassandra_writer import write_to_cassandra
 from spark.spark_session import create_spark_session
+from pyspark.sql.functions import col, to_timestamp
+
+def show_two_rows(df, epoch_id):
+    df.limit(2).show(truncate=False)
+
 
 if __name__ == "__main__":
     spark = create_spark_session()
@@ -22,13 +27,29 @@ if __name__ == "__main__":
     df_devices_raw = read_kafka_device_stream(spark, "devices-topic")
     df_sentiments_raw = read_kafka_sentiment_stream(spark, "sentiments-topic")
 
-    # Nettoyage
+    # Nettoyage avec watermarks
     df_users = clean_user_data(df_users_raw)
     df_apps = clean_application_data(df_apps_raw)
     df_devices = clean_device_data(df_devices_raw)
     df_sentiments = clean_sentiment_data(df_sentiments_raw)
+    
+    # Convert DATE to TIMESTAMP before applying watermarks
+    df_users = df_users.withColumn("record_date", to_timestamp(col("record_date"), "yyyy-MM-dd"))
+    df_devices = df_devices.withColumn("record_date", to_timestamp(col("record_date"), "yyyy-MM-dd"))
+    df_sentiments = df_sentiments.withColumn("record_date", to_timestamp(col("record_date"), "yyyy-MM-dd"))
+    
+    # ADD WATERMARKS - Now with proper TIMESTAMP columns
+    df_users = df_users.withWatermark("record_date", "10 minutes")
+    df_devices = df_devices.withWatermark("record_date", "10 minutes")  
+    df_sentiments = df_sentiments.withWatermark("record_date", "10 minutes")
 
-    # 1. Analyse de corrélation technique des sentiments
+    df_users.writeStream \
+        .outputMode("append") \
+        .foreachBatch(show_two_rows) \
+        .start() \
+        .awaitTermination()
+
+    #1. Analyse de corrélation technique des sentiments
     df_correlation = analyze_sentiment_tech_correlation(df_users, df_apps, df_devices, df_sentiments)
 
     query_corr = df_correlation.writeStream \

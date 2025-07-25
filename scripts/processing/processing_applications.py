@@ -1,4 +1,4 @@
-from pyspark.sql.functions import desc, col, sum, avg, count, when, current_date, lit, current_timestamp
+from pyspark.sql.functions import *
 
 def sum_crash_rate(df_clean):
     return df_clean.groupBy("id", "record_date") \
@@ -31,3 +31,37 @@ def analyze_application_usage(df_apps):
         "avg_crash_by_app": avg_crash_by_app,
         "top5_heavy_apps": heavy_apps
     }
+
+
+def predire_risky_apps(df_apps):
+
+    # Définir les bornes de janvier 2023
+    # start_date = to_date(lit("2023-01-01"), "yyyy-MM-dd")
+    # end_date = to_date(lit("2023-01-31"), "yyyy-MM-dd")
+
+    # # Filtrage uniquement pour les données de janvier 2023
+    # filtered_df = df_apps.filter(
+    #     (col("record_date") >= start_date) & (col("record_date") <= end_date)
+    # )
+
+    last_month_df = df_apps.filter(col("record_date") >= date_sub(current_date(), 30))
+    
+    score_risque = last_month_df.withColumn("risk_cpu", when(col("cpu_consumption") > 80, 1).otherwise(0)) \
+        .withColumn("risk_ram", when(col("ram_consumption") > 80, 1).otherwise(0))\
+        .withColumn("risk_crash", when(col("crash_rate") > 0.3, 1).otherwise(0)) \
+        .withColumn("score_risque",
+                col("risk_cpu") + col("risk_ram") + col("risk_crash"))
+    
+    df_risky_users = score_risque.filter(col("score_risque") >= 2)
+
+    df_result = df_risky_users.select(
+        col("id").alias("app_id"),
+        col("name"),
+        col("compagny"),
+        col("description"),
+        col("platform"),
+        col("score_risque").alias("score_risk"),
+        col("record_date").alias("date")
+    )
+
+    return df_result

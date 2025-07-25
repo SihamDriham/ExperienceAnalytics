@@ -1,4 +1,4 @@
-from kafka.kafka_users_reader import read_kafka_stream
+from kafka.kafka_users_reader import read_kafka_user_stream
 from dataCleaners.users_data_cleaner import clean_user_data
 from processing.processing_users import compute_active_users_stats, compute_os_usage_stats
 from cassandra.cassandra_writer import write_to_cassandra
@@ -7,7 +7,7 @@ from spark.spark_session import create_spark_session
 if __name__ == "__main__":
     spark = create_spark_session()
     
-    df_parsed = read_kafka_stream(spark, "users-topic")
+    df_parsed = read_kafka_user_stream(spark, "users-topic")
     df_clean = clean_user_data(df_parsed)
 
     df_stats = compute_active_users_stats(df_clean)
@@ -17,7 +17,7 @@ if __name__ == "__main__":
     query1 = df_stats.writeStream \
         .outputMode("update") \
         .foreachBatch(lambda df, epoch_id: write_to_cassandra(df, epoch_id, "user_activity_by_department")) \
-        .option("checkpointLocation", "./checkpoints/user_activity_by_department_v2") \
+        .option("checkpointLocation", "./checkpoints/user_activity_by_department") \
         .trigger(processingTime='30 seconds') \
         .start()
 
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     query2 = df_stats2.writeStream \
         .outputMode("update") \
         .foreachBatch(lambda df, epoch_id: write_to_cassandra(df, epoch_id, "user_os_usage_stats")) \
-        .option("checkpointLocation", "./checkpoints/user_os_usage_stats_v1") \
+        .option("checkpointLocation", "./checkpoints/user_os_usage_stats") \
         .trigger(processingTime='30 seconds') \
         .start()
 
