@@ -270,6 +270,18 @@ CREATE TABLE risky_apps (
 );
 ```
 
+```bash
+CREATE TABLE risky_devices (
+     device_id TEXT,
+     hostname TEXT,
+     os TEXT,
+     model TEXT,
+     score_risk INT,
+     date TIMESTAMP,
+     PRIMARY KEY (device_id, date)
+);
+```
+
 ### 5. Lancer le job Spark 
 
 Exécutez-le depuis PowerShell en mode administrateur avec la commande suivante:
@@ -298,6 +310,6 @@ Pour arrêter un job Spark en cours, utilisez `CTRL + C`.
 4. Renseigne :
    - Contact points : cassandra 
    - Port : 9042
-   - Keyspace : experience_analytics
+   - Keyspace : experienceAnalytics
 5. Teste la connexion, elle doit réussir.
 6. Créer un Dashboard avec une requête Cassandra
