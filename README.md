@@ -310,6 +310,6 @@ Pour arrêter un job Spark en cours, utilisez `CTRL + C`.
 4. Renseigne :
    - Contact points : cassandra 
    - Port : 9042
-   - Keyspace : experience_analytics
+   - Keyspace : experienceAnalytics
 5. Teste la connexion, elle doit réussir.
 6. Créer un Dashboard avec une requête Cassandra
