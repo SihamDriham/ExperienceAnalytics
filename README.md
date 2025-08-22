@@ -247,7 +247,7 @@ CREATE TABLE sentiment_by_job_title (
 
 ```bash
 CREATE TABLE predire_risky_users (
-    user_id int,
+    user_id TEXT,
     date date,
     department text,
     full_name text,
@@ -259,7 +259,7 @@ CREATE TABLE predire_risky_users (
 
 ```bash
 CREATE TABLE risky_apps (
-    app_id int,
+    app_id TEXT,
     date DATE,
     name TEXT,
     compagny TEXT,
