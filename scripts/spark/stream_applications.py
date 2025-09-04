@@ -21,7 +21,7 @@ if __name__ == "__main__":
         .trigger(processingTime='30 seconds') \
         .start()
 
-    # Streaming vers Cassandra pour chaque résultat
+    Streaming vers Cassandra pour chaque résultat
     query_usage = results["usage_by_app"].writeStream \
         .outputMode("update") \
         .foreachBatch(lambda df, epoch_id: write_to_cassandra(df, epoch_id, "app_usage_stats")) \
@@ -60,8 +60,8 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("Arrêt manuel du streaming...")
         query1.stop()
-        spark.stop()
         query_usage.stop()
         query_crash.stop()
         query_top5.stop()
         query_risky.stop()
+        spark.stop()

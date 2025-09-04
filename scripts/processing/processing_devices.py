@@ -21,7 +21,19 @@ def predire_risky_devices(df_devices):
     #     (col("record_date") >= start_date) & (col("record_date") <= end_date)
     # )
 
-    last_month_df = df_devices.filter(col("record_date") >= date_sub(current_date(), 30))
+    # Premier jour du mois précédent
+    start_last_month = trunc(add_months(current_date(), -1), "month")
+
+    # Premier jour du mois courant (donc fin du mois précédent)
+    end_last_month = trunc(current_date(), "month")
+
+    # Filtrer uniquement les lignes du mois précédent complet
+    last_month_df = df_devices.filter(
+        (col("record_date") >= start_last_month) &
+        (col("record_date") < end_last_month)
+    )
+
+    #last_month_df = df_devices.filter(col("record_date") >= date_sub(current_date(), 30))
 
     # Calcul des colonnes de risque
     scored_df = last_month_df \

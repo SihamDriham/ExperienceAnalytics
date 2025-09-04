@@ -37,3 +37,5 @@ if __name__ == "__main__":
         query1.stop()
         query2.stop()
         spark.stop()
+
+    

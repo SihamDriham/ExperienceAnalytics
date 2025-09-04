@@ -1,0 +1,26 @@
+# Dockerfile.airflow
+FROM apache/airflow:2.8.0
+
+# Passer en mode root pour installer les packages système si nécessaire
+USER root
+
+# Installer les dépendances système si nécessaire
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Repasser en utilisateur airflow
+USER airflow
+
+# Installer les packages Python nécessaires
+COPY requirements.txt /requirements.txt
+RUN pip install --no-cache-dir -r /requirements.txt
+
+# Ou installer directement les packages principaux
+RUN pip install --no-cache-dir \
+    kafka-python==2.0.2 \
+    cassandra-driver==3.28.0 \
+    pyspark==3.5.0 \
+    pandas==1.5.3 \
+    numpy==1.24.3 \
+    requests==2.31.0

@@ -1,3 +1,104 @@
+# from datetime import datetime, timedelta
+# from airflow import DAG
+# from airflow.operators.bash import BashOperator
+# from airflow.operators.dummy import DummyOperator
+# from airflow.operators.python import PythonOperator
+# import logging
+
+# default_args = {
+#     'owner': 'data-team',
+#     'depends_on_past': False,
+#     'start_date': datetime(2025, 6, 1),
+#     'email_on_failure': True,
+#     'email_on_retry': False,
+#     'retries': 2,
+#     'retry_delay': timedelta(minutes=10),
+#     'catchup': False,
+# }
+
+# # DAG mensuel simplifié
+# dag = DAG(
+#     'monthly_data_pipeline',
+#     default_args=default_args,
+#     description='Pipeline mensuel : producer_users -> stream_users',
+#     schedule_interval='0 2 1 * *',  # chaque 1er du mois à 2h
+#     max_active_runs=1,
+#     tags=['monthly', 'kafka', 'spark', 'users'],
+# )
+
+# def log_pipeline_start():
+#     logging.info("=== DÉBUT DU PIPELINE ===")
+#     logging.info(f"Date d'exécution: {datetime.now()}")
+#     return "PIPELINE_STARTED"
+
+# def log_pipeline_end():
+#     logging.info("=== FIN DU PIPELINE ===")
+#     logging.info(f"Pipeline terminé avec succès à: {datetime.now()}")
+#     return "PIPELINE_COMPLETED"
+
+# # Début
+# start_task = DummyOperator(
+#     task_id='start_pipeline',
+#     dag=dag,
+# )
+
+# log_start_task = PythonOperator(
+#     task_id='log_pipeline_start',
+#     python_callable=log_pipeline_start,
+#     dag=dag,
+# )
+
+# # Producer Users
+# produce_users_task = BashOperator(
+#     task_id='kafka_produce',
+#     bash_command='cd /opt/airflow && python scripts/kafka/producer_users.py',
+#     dag=dag,
+# )
+
+# # Attente pour ingestion Kafka
+# wait_for_kafka = BashOperator(
+#     task_id='wait_for_kafka_messages',
+#     bash_command='echo "Attente de 15 secondes..." && sleep 15',
+#     dag=dag,
+# )
+
+# # Spark Stream Users - MODIFIÉ AVEC JAVA_HOME
+# spark_users_task = BashOperator(
+#     task_id='spark_process',
+#     bash_command='''
+#         export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64 && 
+#         cd /opt/airflow && 
+#         spark-submit spark/stream_users.py
+#     ''',
+#     dag=dag,
+# )
+
+# # Fin
+# log_end_task = PythonOperator(
+#     task_id='log_pipeline_end',
+#     python_callable=log_pipeline_end,
+#     dag=dag,
+# )
+
+# end_task = DummyOperator(
+#     task_id='end_pipeline',
+#     dag=dag,
+# )
+
+# # Dépendances : start -> producer -> wait -> spark -> end
+# start_task >> log_start_task >> produce_users_task >> wait_for_kafka >> spark_users_task >> log_end_task >> end_task
+
+
+
+
+
+
+
+
+
+
+
+
 from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.bash import BashOperator
@@ -120,7 +221,7 @@ spark_applications_task = BashOperator(
 )
 
 spark_alls_task = BashOperator(
-    task_id='spark_process_alls',
+    task_id='spark_process_sentiments',
     bash_command='cd /opt/airflow && spark-submit spark/stream_alls.py',
     dag=dag,
 )

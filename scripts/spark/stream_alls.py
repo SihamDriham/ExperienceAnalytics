@@ -43,11 +43,11 @@ if __name__ == "__main__":
     df_devices = df_devices.withWatermark("record_date", "10 minutes")  
     df_sentiments = df_sentiments.withWatermark("record_date", "10 minutes")
 
-    df_users.writeStream \
-        .outputMode("append") \
-        .foreachBatch(show_two_rows) \
-        .start() \
-        .awaitTermination()
+    # df_users.writeStream \
+    #     .outputMode("append") \
+    #     .foreachBatch(show_two_rows) \
+    #     .start() \
+    #     .awaitTermination()
 
     #1. Analyse de corrélation technique des sentiments
     df_correlation = analyze_sentiment_tech_correlation(df_users, df_apps, df_devices, df_sentiments)

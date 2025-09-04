@@ -35,16 +35,19 @@ def analyze_application_usage(df_apps):
 
 def predire_risky_apps(df_apps):
 
-    # Définir les bornes de janvier 2023
-    # start_date = to_date(lit("2023-01-01"), "yyyy-MM-dd")
-    # end_date = to_date(lit("2023-01-31"), "yyyy-MM-dd")
+    # Premier jour du mois précédent
+    start_last_month = trunc(add_months(current_date(), -1), "month")
 
-    # # Filtrage uniquement pour les données de janvier 2023
-    # filtered_df = df_apps.filter(
-    #     (col("record_date") >= start_date) & (col("record_date") <= end_date)
-    # )
+    # Premier jour du mois courant (donc fin du mois précédent)
+    end_last_month = trunc(current_date(), "month")
 
-    last_month_df = df_apps.filter(col("record_date") >= date_sub(current_date(), 30))
+    # Filtrer uniquement les lignes du mois précédent complet
+    last_month_df = df_apps.filter(
+        (col("record_date") >= start_last_month) &
+        (col("record_date") < end_last_month)
+    )
+
+    #last_month_df = df_apps.filter(col("record_date") >= date_sub(current_date(), 30))
     
     score_risque = last_month_df.withColumn("risk_cpu", when(col("cpu_consumption") > 80, 1).otherwise(0)) \
         .withColumn("risk_ram", when(col("ram_consumption") > 80, 1).otherwise(0))\

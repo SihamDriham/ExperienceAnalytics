@@ -110,7 +110,19 @@ def predire_risky_users(df_users, df_devices, df_apps):
     #     (col("u.record_date") >= start_date) & (col("u.record_date") <= end_date)
     # )
 
-    last_month_df = df_full.filter(col("u.record_date") >= date_sub(current_date(), 30))
+    # Premier jour du mois précédent
+    start_last_month = trunc(add_months(current_date(), -1), "month")
+
+    # Premier jour du mois courant (donc fin du mois précédent)
+    end_last_month = trunc(current_date(), "month")
+
+    # Filtrer uniquement les lignes du mois précédent complet
+    last_month_df = df_full.filter(
+        (col("u.record_date") >= start_last_month) &
+        (col("u.record_date") < end_last_month)
+    )
+
+    #last_month_df = df_full.filter(col("u.record_date") >= date_sub(current_date(), 30))
 
     score_risque = last_month_df.withColumn("risk_cpu", when(col("d.cpu_usage") > 85, 1).otherwise(0)) \
         .withColumn("risk_ram", when(col("d.ram_usage") > 85, 1).otherwise(0))\
