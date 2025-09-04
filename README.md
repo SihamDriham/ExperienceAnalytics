@@ -87,6 +87,9 @@ Le pipeline repose sur les composants suivants :
 ## Étapes de Mise en Place
 
 ### 1. Lancer l’environnement Docker
+```bash
+docker-compose build airflow-init
+```
 
 ```bash
 docker-compose up -d
