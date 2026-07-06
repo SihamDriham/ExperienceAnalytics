@@ -305,7 +305,25 @@ spark-submit spark/stream_alls.py
 **Note :** Exécutez ces commandes une par une, attendez que chaque job se lance correctement avant d’en lancer un autre.  
 Pour arrêter un job Spark en cours, utilisez `CTRL + C`.
 
-### 6. Visualisation avec Grafana
+### 6. Orchestration des traitements avec Airflow
+
+Apache Airflow est utilisé pour orchestrer les traitements batch du pipeline de données.
+
+Le DAG automatise les différentes étapes du workflow :
+
+- Lecture des fichiers CSV
+- Exécution des traitements Spark Batch
+- Calcul des indicateurs analytiques
+- Chargement des résultats dans Cassandra
+- Exécution planifiée des traitements
+
+Cette orchestration garantit une exécution fiable, séquentielle et automatisée des différentes tâches du pipeline.
+
+#### DAG Airflow
+
+<img width="890" height="191" alt="airflow_dag" src="https://github.com/user-attachments/assets/c02aee93-1354-4d80-bc2b-6a9ee9d61b6e" />
+
+### 7. Visualisation avec Grafana
 
 1. Connecte-toi sur http://localhost:3000 avec admin/admin
 2. Va dans Ajouter une sources de données
@@ -316,3 +334,11 @@ Pour arrêter un job Spark en cours, utilisez `CTRL + C`.
    - Keyspace : experienceAnalytics
 5. Teste la connexion, elle doit réussir.
 6. Créer un Dashboard avec une requête Cassandra
+
+**Vidéo de démonstration de la visualisation avec Grafana**
+
+https://github.com/user-attachments/assets/9e06d3f7-f105-4aa1-aa8f-f6c62c2fd0ad
+
+
+
+
