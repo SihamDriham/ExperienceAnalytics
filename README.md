@@ -339,6 +339,14 @@ Cette orchestration garantit une exécution fiable, séquentielle et automatisé
 
 https://github.com/user-attachments/assets/9e06d3f7-f105-4aa1-aa8f-f6c62c2fd0ad
 
+---
 
+## Auteur
+
+**DRIHAM Siham**
+Ingénieure d'État en Big Data 
+🔗 [LinkedIn](https://www.linkedin.com/in/siham-driham-955838238/) · 📧 [sihamdriham@gmail.com]
+
+---
 
 
